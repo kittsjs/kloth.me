@@ -5,8 +5,9 @@ export interface ApiResponse<T = any> {
 }
 
 export interface ImageExtractionResponse {
-  images: string[];
-  url: string;
+  image: string;
+  images?: string[]; // Optional for backward compatibility
+  url?: string;
 }
 
 export interface ThemeMode {

@@ -32,7 +32,7 @@ const Header: React.FC = () => {
     <StyledAppBar position="static" elevation={0}>
       <Toolbar>
         <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center' }}>
-          <StyledTypography variant="h6" component="div">
+          <StyledTypography variant="h6">
             Kloth.me
           </StyledTypography>
         </Box>

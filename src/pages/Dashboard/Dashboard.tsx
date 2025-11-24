@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import axiosInstance from '../../data/axios';
-import { API_ENDPOINTS } from '../../Constants';
+import { API_ENDPOINTS } from '../../constants';
 import { ImageExtractionResponse } from '../../types';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
@@ -19,7 +19,7 @@ const StyledContainer = styled(Container)(({ theme }) => ({
   minHeight: '70vh',
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(() => ({
   '& .MuiOutlinedInput-root': {
     borderRadius: 16,
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',

@@ -1,5 +1,5 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { API_BASE_URL } from '../Constants';
+import axios, { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { API_BASE_URL } from '../constants';
 import { toast } from 'react-toastify';
 
 // Create axios instance

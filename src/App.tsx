@@ -1,10 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { ThemeProvider } from './Core/ThemeProvider/ThemeProvider';
-import Layout from './Core/Layout/Layout';
-import Landing from './Pages/Landing/Landing';
-import Dashboard from './Pages/Dashboard/Dashboard';
-import { ROUTES } from './Constants';
+import { ThemeProvider } from './core/ThemeProvider/ThemeProvider';
+import Layout from './core/Layout/Layout';
+import Landing from './pages/Landing/Landing';
+import Dashboard from './pages/Dashboard/Dashboard';
+import { ROUTES } from './constants';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 

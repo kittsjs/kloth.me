@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { Brightness4, Brightness7, SettingsBrightness } from '@mui/icons-material';
-import { useThemeMode } from '../../Core/ThemeProvider/ThemeProvider';
+import { useThemeMode } from '../../core/ThemeProvider/ThemeProvider';
 
 const ThemeSwitcher: React.FC = () => {
   const { mode, setMode } = useThemeMode();

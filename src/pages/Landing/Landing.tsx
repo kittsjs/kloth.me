@@ -3,7 +3,7 @@ import { Box, Button, Container, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import GoogleIcon from '@mui/icons-material/Google';
 import { styled } from '@mui/material/styles';
-import { ROUTES } from '../../Constants';
+import { ROUTES } from '../../constants';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   minHeight: '80vh',
