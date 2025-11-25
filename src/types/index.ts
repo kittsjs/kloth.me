@@ -6,7 +6,7 @@ export interface ApiResponse<T = any> {
 
 export interface ImageExtractionResponse {
   image: string;
-  images?: string[]; // Optional for backward compatibility
+  imageList?: string[]; // List of all images from the URL
   url?: string;
 }
 
