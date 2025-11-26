@@ -5,6 +5,42 @@ import {
 } from './domainConfig/domainMappings.js';
 
 class ScraperService {
+  constructor() {
+    /**
+     * Lazily created shared Puppeteer browser instance to avoid relaunch cost
+     * @type {Promise<import('puppeteer').Browser>|null}
+     */
+    this.browserPromise = null;
+  }
+
+  /**
+   * Returns a shared Puppeteer browser instance, creating it on first use
+   * @returns {Promise<import('puppeteer').Browser>}
+   */
+  async getBrowser() {
+    if (!this.browserPromise) {
+      console.log('Launching shared Puppeteer browser instance...');
+      this.browserPromise = puppeteer.launch({
+        headless: 'new',
+        executablePath: puppeteer.executablePath(),
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-blink-features=AutomationControlled',
+          '--disable-dev-shm-usage',
+          '--disable-web-security',
+          '--disable-features=IsolateOrigins,site-per-process'
+        ],
+        ignoreHTTPSErrors: true
+      }).catch(err => {
+        // If launch fails, reset so we can retry next time
+        this.browserPromise = null;
+        throw err;
+      });
+    }
+
+    return this.browserPromise;
+  }
   /**
    * Normalizes domain from URL by removing www. prefix
    * @param {string} url - The URL to analyze
@@ -111,26 +147,9 @@ class ScraperService {
    * @returns {Promise<{image: string|null, imageList: string[]}>}
    */
   async extractWithPuppeteer(url, extractor) {
-    let browser = null;
-    
     try {
       console.log('Using Puppeteer for extraction...');
-      
-      // Launch browser with headless mode and stealth settings
-      browser = await puppeteer.launch({
-        headless: 'new',
-        executablePath: puppeteer.executablePath(),
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-blink-features=AutomationControlled',
-          '--disable-dev-shm-usage',
-          '--disable-web-security',
-          '--disable-features=IsolateOrigins,site-per-process'
-        ],
-        ignoreHTTPSErrors: true
-      });
-
+      const browser = await this.getBrowser();
       const page = await browser.newPage();
       
       // Set a realistic user agent to avoid bot detection
@@ -196,14 +215,28 @@ class ScraperService {
       
       // Set a reasonable viewport size
       await page.setViewport({ width: 1920, height: 1080 });
+
+      // Speed optimizations: block non-essential resources (fonts, media) to reduce load time
+      await page.setRequestInterception(true);
+      page.on('request', (request) => {
+        const resourceType = request.resourceType();
+        // We need document, script, xhr/fetch, stylesheet for layout; images are optional since we usually just read src/background-image
+        if (['media', 'font'].includes(resourceType)) {
+          return request.abort();
+        }
+        return request.continue();
+      });
+
+      // Tighter navigation timeout
+      page.setDefaultNavigationTimeout(30000);
       
       console.log('Navigating to page...');
       
       // Navigate to the URL with better error handling
       try {
         await page.goto(url, {
-          waitUntil: 'load',
-          timeout: 60000
+          waitUntil: 'domcontentloaded',
+          timeout: 30000
         });
       } catch (gotoError) {
         // If initial goto fails, try with a different wait strategy
@@ -211,17 +244,17 @@ class ScraperService {
           console.log('First attempt failed, trying alternative approach...');
           await page.goto(url, {
             waitUntil: 'networkidle2',
-            timeout: 60000
+            timeout: 30000
           });
         } else {
           throw gotoError;
         }
       }
       
-      console.log('Page loaded, waiting for dynamic content...');
+      console.log('Page loaded, waiting briefly for dynamic content...');
 
-      // Wait for dynamic content using Promise-based delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Short wait for dynamic content; most sites render primary gallery quickly
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       console.log('Extracting image using site-specific extractor...');
       
@@ -238,10 +271,9 @@ class ScraperService {
       
       return payload;
 
-    } finally {
-      if (browser) {
-        await browser.close();
-      }
+    } catch (error) {
+      console.error('Puppeteer extraction error:', error.message);
+      throw error;
     }
   }
 }
