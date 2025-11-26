@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { extractImages as extractImagesAPI } from '../../data/imageExtraction';
+import { isAmazonUrl, processAmazonImageUrls } from '../../utils/imageUtils';
 
 const StyledContainer = styled(Container)(({ theme }) => ({
   padding: theme.spacing(4),
@@ -159,9 +160,18 @@ const Dashboard: React.FC = () => {
     try {
       // API function will handle encoding internally
       const response = await extractImagesAPI(decodedUrl);
+      
+      // Set main image as-is (no processing)
       setImageUrl(response.image);
+      
+      // Check if the user's URL is an Amazon URL for processing imageList only
+      const isAmazon = isAmazonUrl(decodedUrl);
+      
       if (response.imageList && response.imageList.length > 0) {
-        setImagesList(response.imageList);
+        // Process image list only if it's an Amazon URL
+        const imageList = isAmazon ? processAmazonImageUrls(response.imageList) : response.imageList;
+        console.log(imageList);
+        setImagesList(imageList);
       }
     } catch (err: any) {
       // Error is already handled by axios interceptor (toast)
